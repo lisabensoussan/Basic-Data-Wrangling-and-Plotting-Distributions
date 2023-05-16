@@ -256,33 +256,37 @@ In our case all the regions distributivities are greather than 0, therfor they a
 ```{r, cache=TRUE} 
 Comparing_countries <- function(data, country_names) {
   
-  #we'll filter the data to the disered data 
-  
-year_cols <- grep("^X[0-9]{4}$", colnames(data), value = TRUE)
-years <- unique(as.numeric(substr(year_cols, 2, 5)))
+  if ("Country" %in% colnames(data)) {
+    place_col <- "Country"
+  } else {
+    place_col <- "Region"
+  } 
+   
+  year_cols <- grep("^X[0-9]{4}$", colnames(data), value = TRUE)
+  years <- unique(as.numeric(substr(year_cols, 2,5)))
 
-fil_data <- data[data$Country %in% country_names, ]
-color <- rainbow(length(country_names))
+  fil_data <- data[data[[place_col]] %in% country_names, ]
+  color <- rainbow(length(country_names))
 
- plot(NULL, xlim = range(years), ylim = c(0, 10),
+  plot(NULL, xlim = range(years), ylim = c(0, 10),
        xlab = "Year", ylab = "Democracy Index",
        main = "Democracy Index for Countries")  
  
-axis(1, at = years, labels = years)
+  axis(1, at = years, labels = years)
 
-for (i in 1:length(country_names)) {
-    Country <- country_names[i]
-    country_data <- fil_data[fil_data$Country == Country, ]
+  for (i in 1:length(country_names)) {
+    place <- country_names[i]
+    country_data <- fil_data[fil_data[[place_col]] == place, ]
     lines(years, t(country_data[year_cols]), type = "l", col = color[i])
   }
   
- legend("bottomright", inset = 0.02, legend = country_names,
+  legend("bottomright", inset = 0.02, legend = country_names,
          col = color, pch = 19, bty = "n")
-  
+
 }
    
 
-Comparing_countries(list_by_country, c("Canada", "Peru", "France"))
+Comparing_countries(list_by_region, c("Asia and Australasia", "Sub-Saharan Africa"))
 
 ```
 

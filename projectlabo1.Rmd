@@ -158,13 +158,13 @@ democracy <- read_html("https://en.wikipedia.org/wiki/Democracy_Index")
 all.tables = html_nodes(democracy, "table")  
 
 # Use html_table to extract the individual tables from the all.tables object:
-categories <- as.data.frame(html_table(all.tables[3], fill = TRUE))  # Example 
+categories <- as.data.frame(html_table(all.tables[4], fill = TRUE))  # Example 
 
 #based on the example we called all the relevant tables in order and names them accordingly 
-list_by_region <- as.data.frame(html_table(all.tables[4], fill = TRUE))
-list_by_region22 <- as.data.frame(html_table(all.tables[5], fill = TRUE))
-list_by_country <- as.data.frame(html_table(all.tables[6], fill = TRUE))
-components <- as.data.frame(html_table(all.tables[7], fill = TRUE))
+list_by_region <- as.data.frame(html_table(all.tables[5], fill = TRUE))
+list_by_region22 <- as.data.frame(html_table(all.tables[6], fill = TRUE))
+list_by_country <- as.data.frame(html_table(all.tables[7], fill = TRUE))
+components <- as.data.frame(html_table(all.tables[8], fill = TRUE))
 
 # we'll call the top five of the required variances
 head(categories)
@@ -295,24 +295,113 @@ YOUR ANALYSIS HERE
 
 3.b. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+index_diff <- list_by_country$X2022 - list_by_country$X2006
+#first cluster
+big_increase_cluster <- list_by_country[index_diff >= 1.5, "Country"]
+#second cluster
+big_decrease_cluster <- list_by_country[index_diff <= -1.5, "Country"]
+#third cluster
+small_increase_cluster <- list_by_country[index_diff > 0.75 & index_diff <= 1.5, "Country"]
+#fourth cluster
+small_decrease_cluster <- list_by_country[index_diff < -0.75 & index_diff >= -1.5, "Country"]
+
+list_by_country$min_index <- apply(list_by_country[, 6:19], 1, min)
+
+#fifth cluster
+index_min_diff_2006 <- list_by_country$X2006 - list_by_country$min_index
+index_min_diff_2022 <- list_by_country$X2022 - list_by_country$min_index
+
+decrease_increase <- list_by_country$Country[index_min_diff_2006 >= 0.75 & index_min_diff_2022 >= 0.75]
+
+#sixth cluster
+list_by_country$max_index <- apply(list_by_country[, 6:19], 1, max)
+index_max_diff_2006 <- list_by_country$X2006 - list_by_country$max_index
+index_max_diff_2022 <- list_by_country$X2022 - list_by_country$max_index
+increase_decrease <- list_by_country$Country[index_max_diff_2006 <= -0.75 & index_max_diff_2022 <= -0.75]
+
+#seventh cluster
+bare_change <- list_by_country$Country[list_by_country$max_index-list_by_country$min_index < 0.5 ]
+
+#height cluster
+other_countries <- list_by_country$Country[!(list_by_country$Country %in% c(big_increase_cluster,big_decrease_cluster,small_increase_cluster, small_decrease_cluster, decrease_increase, increase_decrease, bare_change))]
+
+#comparing countries
+
+Comparing_countries(list_by_country, big_increase_cluster)
+Comparing_countries(list_by_country, big_decrease_cluster)
+Comparing_countries(list_by_country, small_increase_cluster)
+Comparing_countries(list_by_country, small_decrease_cluster)
+Comparing_countries(list_by_country, decrease_increase)
+Comparing_countries(list_by_country, increase_decrease)
+Comparing_countries(list_by_country, bare_change)
+Comparing_countries(list_by_country, other_countries)
 ```
 
 YOUR ANALYSIS HERE
 
 4.
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+# Step 1: Filter the data table for 2006 and 2022
+data_for_freq <- select(list_by_country,Country,X2006,X2022)
+
+
+data_for_freq$Regime_Type_2006 <- NA
+data_for_freq$Regime_Type_2022 <- NA
+
+# Assign regime type based on score conditions
+data_for_freq$Regime_Type_2006 <- ifelse(data_for_freq$X2006 >= 8.01 & data_for_freq$X2006 <= 10, "Full democracies",
+                              ifelse(data_for_freq$X2006 >= 6.01 & data_for_freq$X2006 <= 8, "Flawed democracies",
+                              ifelse(data_for_freq$X2006 >= 4.01 & data_for_freq$X2006 <= 6, "Hybrid regimes",
+                              ifelse(data_for_freq$X2006 >= 0 & data_for_freq$X2006 <= 4, "Authoritarian regimes", NA))))
+
+data_for_freq$Regime_Type_2022 <- ifelse(data_for_freq$X2022 >= 8.01 & data_for_freq$X2022 <= 10, "Full democracies",
+                              ifelse(data_for_freq$X2022 >= 6.01 & data_for_freq$X2022 <= 8, "Flawed democracies",
+                              ifelse(data_for_freq$X2022 >= 4.01 & data_for_freq$X2022 <= 6, "Hybrid regimes",
+                              ifelse(data_for_freq$X2022 >= 0 & data_for_freq$X2022 <= 4, "Authoritarian regimes", NA))))
+
+data_for_freqs <- table(data_for_freq$Regime_Type_2006 ,data_for_freq$Regime_Type_2022)
+
+transition_probabilities <- prop.table(data_for_freqs, margin = 1)
+transition_probabilities
+
+regime_categories <- c("Full democracy", "Flawed democracy", "Hybrid regime", "Authoritarian")
+prob_table <- matrix(transition_probabilities, nrow = 4, byrow = TRUE, dimnames = list(regime_categories, regime_categories))
+
+print(prob_table)
+
+# Create a heatmap
+heatmap(prob_table, col = colorRampPalette(c("white", "green"))(20), main = "Regime Transition Probabilities")
 ```
 
 YOUR ANALYSIS HERE
 
 
 
-
 5.a. 
-```{r, cache=TRUE} 
-# YOUR CODE HERE
+```{r, cache=TRUE}
+gdp_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_GDP_(PPP)_per_capita")
+population_size_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population")
+incarnation_rates_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_incarceration_rate")
+area_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area")
+
+all.tables = html_nodes(gdp_url, "table")  
+gdp_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+
+
+all.tables = html_nodes(population_size_url, "table")  
+population_size_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+
+all.tables = html_nodes(incarnation_rates_url, "table")  
+incarnation_rate_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))
+
+
+all.tables = html_nodes(area_url, "table")  
+area_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+
+gdp_table
+#joined_table <- merge(list_by_country, gdp_table, by = "Country", all.x = TRUE)
+gdp_table
+joined_table
 ```
 
 YOUR ANALYSIS HERE
@@ -373,6 +462,3 @@ YOUR ANALYSIS HERE
 ```
 
 YOUR ANALYSIS HERE
-rfrf
-
-

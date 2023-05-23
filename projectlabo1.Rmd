@@ -384,24 +384,35 @@ population_size_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries
 incarnation_rates_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_incarceration_rate")
 area_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area")
 
-all.tables = html_nodes(gdp_url, "table")  
-gdp_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+gdp.tables = html_nodes(gdp_url, "table")  
+gdp_table <- as.data.frame(html_table(gdp.tables[2], fill = TRUE))  
 
 
-all.tables = html_nodes(population_size_url, "table")  
-population_size_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+pop.tables = html_nodes(population_size_url, "table")  
+population_size_table <- as.data.frame(html_table(pop.tables[2], fill = TRUE))  
 
-all.tables = html_nodes(incarnation_rates_url, "table")  
-incarnation_rate_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))
+incar.tables = html_nodes(incarnation_rates_url, "table")  
+incarnation_rate_table <- as.data.frame(html_table(incar.tables[2], fill = TRUE))
 
 
-all.tables = html_nodes(area_url, "table")  
-area_table <- as.data.frame(html_table(all.tables[2], fill = TRUE))  
+area.tables = html_nodes(area_url, "table")  
+area_table <- as.data.frame(html_table(area.tables[2], fill = TRUE))  
 
-gdp_table
-#joined_table <- merge(list_by_country, gdp_table, by = "Country", all.x = TRUE)
-gdp_table
-joined_table
+colnames(gdp_table)[colnames(gdp_table) == "Country.Territory"] <- "Country"
+colnames(population_size_table)[colnames(population_size_table) == "Country...Dependency"] <- "Country"
+colnames(incarnation_rate_table)[colnames(incarnation_rate_table) == "Location"] <- "Country"
+colnames(area_table)[colnames(area_table) == "Country...Dependency"] <- "Country"
+gdp_table$Country <- gsub("\\*$", "", gdp_table$Country)
+gdp_table$Country <- gsub("\\ ", "", gdp_table$Country)
+
+
+joined_table <- merge(list_by_country, gdp_table, by = "Country", all.x = TRUE)
+joined_table <- merge(joined_table, population_size_table, by = "Country", all.x = TRUE)
+joined_table <- merge(joined_table, incarnation_rate_table, by = "Country", all.x = TRUE)
+joined_table <- merge(joined_table, area_table, by = "Country", all.x = TRUE)
+joined_table <- as.data.frame(joined_table)
+
+head(joined_table)
 ```
 
 YOUR ANALYSIS HERE
@@ -409,14 +420,59 @@ YOUR ANALYSIS HERE
 
 5.b. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+joined_table <- na.omit(joined_table)
+joined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
+colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
+colnames(joined_table)[colnames(joined_table) == "IMF.5..6..1"] <- "IMF.year"
+colnames(joined_table)[colnames(joined_table) == "World.Bank.7."] <- "World.bank.est"
+colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.bank.year"
+colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
+colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
+
+reg_mod_cia <- lm(`CIA.est` ~ X2022, data = joined_table)
+summary(reg_mod_cia)
+
+ggplot(joined_table, aes(x = X2022, y = `CIA.est`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Democracy Index 2022", y = "GDP (PPP) per capita") +
+  ggtitle("Scatter Plot of GDP vs. Democracy Index")
+
+
+colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
+reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = joined_table)
+summary(reg_mod_inca)
+
+ggplot(joined_table, aes(x = X2022, y = `Rate.100000`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Democracy Index 2022", y = "Rate incarceration (per 100 000") +
+  ggtitle("Scatter Plot Rate incarceration vs. Democracy Index")
 ```
 
 YOUR ANALYSIS HERE
 
 6.a. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+sampled_gdp <- sample(joined_table$X2022, size = 1000, replace = TRUE)
+
+# Compute empirical CDF
+empirical_cdf <- ecdf(sampled_gdp)
+
+# Generate a sequence of values
+x <- seq(min(sampled_gdp), max(sampled_gdp), length.out = 100)
+
+# Calculate empirical CDF values for the sequence of x values
+y <- empirical_cdf(x)
+
+# Create a data frame with x and y values
+cdf_data <- data.frame(x, y)
+
+# Plot the empirical CDF
+ggplot(cdf_data, aes(x = x, y = y)) +
+  geom_step() +
+  labs(x = "GDP (PPP) per capita", y = "Empirical CDF") +
+  ggtitle("Empirical CDF of GDP (PPP) per capita for a Randomly Selected Country")
 ```
 
 YOUR ANALYSIS HERE
@@ -424,7 +480,32 @@ YOUR ANALYSIS HERE
 
 6.b. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+library(ggplot2)
+
+joined_table$Population <- as.numeric(joined_table$Population)
+
+# Randomly sample GDP values for a selected person
+sampled_gdp_person <- sample(joined_table$X2022, size = 55, replace = TRUE)
+
+# Filter out non-numeric and missing values from GDP
+filtered_gdp_person <- na.omit(as.numeric(sampled_gdp_person))
+
+# Calculate the cumulative sum of the population size
+population_cdf <- cumsum(joined_table$Population) / sum(joined_table$Population)
+
+# Create a data frame with filtered GDP values and population CDF
+cdf_data_person <- data.frame(GDP = filtered_gdp_person, PopulationCDF = population_cdf)
+
+# Sort the data frame by GDP values
+cdf_data_person <- cdf_data_person[order(cdf_data_person$GDP), ]
+
+# Plot the empirical CDF for GDP and population
+ggplot() +
+  geom_step(data = cdf_data_person, aes(x = GDP, y = PopulationCDF), color = "red", linewidth = 1) +
+  labs(x = "GDP (PPP) per capita", y = "Empirical CDF", title = "Empirical CDF of GDP (PPP) per capita") +
+  scale_x_log10() +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal()
 ```
 
 YOUR ANALYSIS HERE

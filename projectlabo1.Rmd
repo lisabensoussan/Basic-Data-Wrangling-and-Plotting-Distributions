@@ -513,7 +513,61 @@ YOUR ANALYSIS HERE
 
 6.c. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+colnames(joined_table)[colnames(joined_table) == "Landin.km2..mi2."] <- "LandArea"
+land_area <- as.numeric(joined_table$LandArea)
+
+# Remove non-numeric and missing values from X2022 column
+x2022_numeric <- as.numeric(joined_table$X2022)
+x2022_clean <- x2022_numeric[!is.na(x2022_numeric)]
+
+# Sample GDP values for a person
+sampled_gdp_person <- sample(x2022_clean, size = 55, replace = TRUE)
+
+# Sample GDP values for land area
+sampled_gdp_land_area <- sample(x2022_clean, size = 55, replace = TRUE)
+
+# Calculate the cumulative distribution of land area
+land_area_cdf <- cumsum(land_area) / sum(land_area)
+
+# Calculate the empirical CDF for the sampled GDP values based on person
+empirical_cdf_person <- ecdf(sampled_gdp_person)
+
+# Generate a sequence of GDP values
+gdp_values <- seq(min(sampled_gdp_person), max(sampled_gdp_person), length.out = 100)
+
+# Calculate the empirical CDF for the sampled GDP values based on land area
+empirical_cdf_land_area <- ecdf(sampled_gdp_land_area)
+
+# Calculate the cumulative probabilities using the empirical CDF based on land area
+cdf_values_land_area <- empirical_cdf_land_area(gdp_values)
+
+# Create a data frame with GDP values and their corresponding cumulative probabilities based on land area
+cdf_data_land_area <- data.frame(GDP = gdp_values, Probability = cdf_values_land_area)
+
+# Plot the empirical CDF for Z
+ggplot(cdf_data_land_area, aes(x = GDP, y = Probability)) +
+  geom_step() +
+  labs(x = "GDP (PPP) per capita", y = "Empirical CDF") +
+  ggtitle("Empirical CDF of GDP (PPP) per capita for a Randomly Selected Person (Uniformly from Land Area)")
+
+# Calculate the median, 25th percentile, and 75th percentile for X, Y, and Z
+percentiles <- c(0.25, 0.5, 0.75)
+x_percentiles <- quantile(x2022_clean, percentiles)
+y_percentiles <- quantile(sampled_gdp_person, percentiles)
+z_percentiles <- quantile(sampled_gdp_land_area, percentiles)
+
+# Print the results
+cat("X - Median:", x_percentiles[2], "\n")
+cat("X - 25th Percentile:", x_percentiles[1], "\n")
+cat("X - 75th Percentile:", x_percentiles[3], "\n\n")
+
+cat("Y - Median:", y_percentiles[2], "\n")
+cat("Y - 25th Percentile:", y_percentiles[1], "\n")
+cat("Y - 75th Percentile:", y_percentiles[3], "\n\n")
+
+cat("Z - Median:", z_percentiles[2], "\n")
+cat("Z - 25th Percentile:", z_percentiles[1], "\n")
+cat("Z - 75th Percentile:", z_percentiles[3], "\n")
 ```
 
 YOUR ANALYSIS HERE

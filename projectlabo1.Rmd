@@ -158,13 +158,13 @@ democracy <- read_html("https://en.wikipedia.org/wiki/Democracy_Index")
 all.tables = html_nodes(democracy, "table")  
 
 # Use html_table to extract the individual tables from the all.tables object:
-categories <- as.data.frame(html_table(all.tables[4], fill = TRUE))  # Example 
+categories <- as.data.frame(html_table(all.tables[3], fill = TRUE))  # Example 
 
 #based on the example we called all the relevant tables in order and names them accordingly 
-list_by_region <- as.data.frame(html_table(all.tables[5], fill = TRUE))
-list_by_region22 <- as.data.frame(html_table(all.tables[6], fill = TRUE))
-list_by_country <- as.data.frame(html_table(all.tables[7], fill = TRUE))
-components <- as.data.frame(html_table(all.tables[8], fill = TRUE))
+list_by_region <- as.data.frame(html_table(all.tables[4], fill = TRUE))
+list_by_region22 <- as.data.frame(html_table(all.tables[5], fill = TRUE))
+list_by_country <- as.data.frame(html_table(all.tables[6], fill = TRUE))
+components <- as.data.frame(html_table(all.tables[7], fill = TRUE))
 
 # we'll call the top five of the required variances
 head(categories)

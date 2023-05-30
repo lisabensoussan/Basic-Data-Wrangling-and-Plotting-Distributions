@@ -428,18 +428,29 @@ colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.ba
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
 
-reg_mod_cia <- lm(`CIA.est` ~ X2022, data = na.omit(joined_table[, c("CIA.est", "X2022")]))
+data <- na.omit(joined_table[, c("CIA.est", "X2022")])
+
+data$CIA.est <- as.numeric(data$CIA.est)
+data$X2022 <- as.numeric(data$X2022)
+
+reg_mod_cia <- lm(CIA.est ~ X2022, data = data)
 summary(reg_mod_cia)
 
-plot(joined_table$X2022, joined_table$CIA.est, xlab = "Democracy Index", ylab = "GDP (PPP) per capita")
-abline(reg_mod_cia, col="red")
+plot(data$X2022, data$CIA.est, xlab = "Democracy Index", ylab = "GDP (PPP) per capita")
+abline(reg_mod_cia, col = "red")
 
 colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
-reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = na.omit(joined_table[, c("Rate.100000", "X2022")]))
+data1 <- na.omit(joined_table[, c("Rate.100000", "X2022")])
+
+data1$Rate.100000 <- as.numeric(data1$Rate.100000)
+data1$X2022 <- as.numeric(data1$X2022)
+
+reg_mod_inca <- lm(Rate.100000 ~ X2022, data = data1)
 summary(reg_mod_inca)
 
-plot(joined_table$X2022, joined_table$Rate.100000, xlab = "Democracy Index", ylab = "Incarnation Rate")
+plot(data1$X2022, data1$Rate.100000, xlab = "Democracy Index", ylab = "Incarnation Rate")
 abline(reg_mod_inca, col="red")
+
 
 ```
 

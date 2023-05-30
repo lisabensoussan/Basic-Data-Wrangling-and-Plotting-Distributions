@@ -420,7 +420,6 @@ YOUR ANALYSIS HERE
 
 5.b. 
 ```{r, cache=TRUE} 
-joined_table <- na.omit(joined_table)
 joined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
 colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
 colnames(joined_table)[colnames(joined_table) == "IMF.5..6..1"] <- "IMF.year"
@@ -429,25 +428,19 @@ colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.ba
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
 
-reg_mod_cia <- lm(`CIA.est` ~ X2022, data = joined_table)
+reg_mod_cia <- lm(`CIA.est` ~ X2022, data = na.omit(joined_table[, c("CIA.est", "X2022")]))
 summary(reg_mod_cia)
 
-ggplot(joined_table, aes(x = X2022, y = `CIA.est`)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(x = "Democracy Index 2022", y = "GDP (PPP) per capita") +
-  ggtitle("Scatter Plot of GDP vs. Democracy Index")
-
+plot(joined_table$X2022, joined_table$CIA.est, xlab = "Democracy Index", ylab = "GDP (PPP) per capita")
+abline(reg_mod_cia, col="red")
 
 colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
-reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = joined_table)
+reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = na.omit(joined_table[, c("Rate.100000", "X2022")]))
 summary(reg_mod_inca)
 
-ggplot(joined_table, aes(x = X2022, y = `Rate.100000`)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(x = "Democracy Index 2022", y = "Rate incarceration (per 100 000") +
-  ggtitle("Scatter Plot Rate incarceration vs. Democracy Index")
+plot(joined_table$X2022, joined_table$Rate.100000, xlab = "Democracy Index", ylab = "Incarnation Rate")
+abline(reg_mod_inca, col="red")
+
 ```
 
 YOUR ANALYSIS HERE

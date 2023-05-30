@@ -575,7 +575,52 @@ YOUR ANALYSIS HERE
 
 7 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+#select the country names and from year 2006 till 2022
+avg_table <- select(list_by_country,Country,c(5:19))
+
+#create a new empty column to store the average for each country 
+avg_table$avg <- NA
+row_sums <- rowSums(avg_table[, c(2:16)])
+#enter and calculate averages for each country 
+avg_table$avg <- row_sums/15
+
+world_map <- joinCountryData2Map(avg_table, joinCode = "NAME", nameJoinColumn = "Country")
+
+#The world map with color based on average value
+mapCountryData(world_map, nameColumnToPlot = "avg", mapTitle = "Average Value",
+               catMethod = "fixedWidth", numCats = 10, missingCountryCol = "white", addLegend = TRUE, oceanCol = "lightblue")
+
+
+
+table_2006 <- select(list_by_country,Country,c(19))
+mapCountryData(world_map, nameColumnToPlot = "X2006…
+[16:39, 30/05/2023] Lisa Stat : 5.bjoined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
+colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
+colnames(joined_table)[colnames(joined_table) == "IMF.5..6..1"] <- "IMF.year"
+colnames(joined_table)[colnames(joined_table) == "World.Bank.7."] <- "World.bank.est"
+colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.bank.year"
+colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
+colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
+
+reg_mod_cia <- lm(`CIA.est` ~ X2022, data = na.omit(joined_table[, c("CIA.est", "X2022")]))
+summary(reg_mod_cia)
+
+ggplot(na.omit(joined_table[, c("CIA.est", "X2022")]), aes(x = X2022, y = CIA.est)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(x = "Democracy Index 2022", y = "GDP (PPP) per capita") +
+  ggtitle("Scatter Plot of GDP vs. Democracy Index with Regression Line")
+
+
+colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
+reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = na.omit(joined_table[, c("Rate.100000", "X2022")]))
+summary(reg_mod_inca)
+
+ggplot(na.omit(joined_table[, c("Rate.100000", "X2022")]), aes(x = X2022, y = Rate.100000)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(x = "Democracy Index 2022", y = "Rate incarceration (per 100,000)") +
+  ggtitle("Scatter Plot of Rate Incarceration vs. Democracy Index with Regression Line")
 ```
 
 YOUR ANALYSIS HERE
@@ -585,7 +630,33 @@ YOUR ANALYSIS HERE
 
 8.a. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+#Joining the components table in a new variable:
+
+
+joined_comp <- merge(components,joined_table,by = "Country")
+
+#changing the titles of 5 columns that we'll need :
+
+colnames(joined_comp)[colnames(joined_comp) == "Elec.toral.pro.cessand.plura.lism"] <- "Electoral_processand_pluralism"
+colnames(joined_comp)[colnames(joined_comp) == "Func.tioningof.govern.ment"] <- "Functioning_of_government"
+colnames(joined_comp)[colnames(joined_comp) == "Poli.ticalpartici.pation"] <- "Political_participation"
+colnames(joined_comp)[colnames(joined_comp) == "Poli.ticalcul.ture"] <- "Political_culture"
+colnames(joined_comp)[colnames(joined_comp) == "Civilliber.ties"] <- "Civil_liberties"
+
+#Show the first 5
+head(joined_comp,5)
+
+#calculate the correlations between those 
+
+selected_columns <- select(joined_comp,Electoral_processand_pluralism, Functioning_of_government, 
+                      Political_participation, Political_culture, Civil_liberties)
+
+selected_columns <- as.data.frame(lapply(selected_columns, as.numeric))
+
+cor_matrix <- cor(selected_columns)
+
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.col = "black", tl.srt = 45)
 ```
 
 YOUR ANALYSIS HERE
@@ -593,7 +664,12 @@ YOUR ANALYSIS HERE
 
 8.b. 
 ```{r, cache=TRUE} 
-# YOUR CODE HERE
+
+# Fit the multiple linear regression model
+reg_model <- lm(CIA.est ~ Electoral_processand_pluralism + Functioning_of_government + Political_participation + Political_culture + Civil_liberties, data = joined_comp)
+
+# Display the summary of the regression analysis
+summary(reg_model)
 ```
 
 YOUR ANALYSIS HERE

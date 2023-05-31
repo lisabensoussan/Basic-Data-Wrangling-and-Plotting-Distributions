@@ -450,6 +450,7 @@ population_size_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries
 incarnation_rates_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_incarceration_rate")
 area_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area")
 
+# Extracting tables from HTML data
 gdp.tables = html_nodes(gdp_url, "table")  
 gdp_table <- as.data.frame(html_table(gdp.tables[2], fill = TRUE))  
 
@@ -464,29 +465,36 @@ incarnation_rate_table <- as.data.frame(html_table(incar.tables[2], fill = TRUE)
 area.tables = html_nodes(area_url, "table")  
 area_table <- as.data.frame(html_table(area.tables[2], fill = TRUE))  
 
+# Renaming columns of the tables
 colnames(gdp_table)[colnames(gdp_table) == "Country.Territory"] <- "Country"
 colnames(population_size_table)[colnames(population_size_table) == "Country...Dependency"] <- "Country"
 colnames(incarnation_rate_table)[colnames(incarnation_rate_table) == "Location"] <- "Country"
 colnames(area_table)[colnames(area_table) == "Country...Dependency"] <- "Country"
+
+# Cleaning country names in the GDP table
 gdp_table$Country <- gsub("\\*$", "", gdp_table$Country)
 gdp_table$Country <- gsub("\\ ", "", gdp_table$Country)
 
-
+# Merging tables based on the "Country" column
 joined_table <- merge(list_by_country, gdp_table, by = "Country", all.x = TRUE)
 joined_table <- merge(joined_table, population_size_table, by = "Country", all.x = TRUE)
 joined_table <- merge(joined_table, incarnation_rate_table, by = "Country", all.x = TRUE)
 joined_table <- merge(joined_table, area_table, by = "Country", all.x = TRUE)
 joined_table <- as.data.frame(joined_table)
 
+# Displaying the head of the joined table
 head(joined_table)
 ```
 
-YOUR ANALYSIS HERE
+We can see the first 5 countries in this new table with all the necessaries information added, like the rate of incarnation or the number of population for every countries
 
 
 5.b. 
 ```{r, cache=TRUE} 
+# Removing commas from all columns of the joined table
 joined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
+
+# Renaming specific columns in the joined table
 colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
 colnames(joined_table)[colnames(joined_table) == "IMF.5..6..1"] <- "IMF.year"
 colnames(joined_table)[colnames(joined_table) == "World.Bank.7."] <- "World.bank.est"
@@ -494,33 +502,43 @@ colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.ba
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
 colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
 
+# Creating a new data frame with selected columns and removing rows with NA values
 data <- na.omit(joined_table[, c("CIA.est", "X2022")])
 
+# Converting selected columns to numeric
 data$CIA.est <- as.numeric(data$CIA.est)
 data$X2022 <- as.numeric(data$X2022)
 
+# Performing linear regression using CIA.est as the response variable and X2022 as the predictor
 reg_mod_cia <- lm(CIA.est ~ X2022, data = data)
+# Displaying the summary of the linear regression model
 summary(reg_mod_cia)
 
+# Plotting the relationship between Democracy Index (X2022) and GDP (PPP) per capita (CIA.est)
 plot(data$X2022, data$CIA.est, xlab = "Democracy Index", ylab = "GDP (PPP) per capita")
 abline(reg_mod_cia, col = "red")
 
+# Renaming specific columns in the joined table
 colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
 data1 <- na.omit(joined_table[, c("Rate.100000", "X2022")])
 
+# Converting selected columns to numeric
 data1$Rate.100000 <- as.numeric(data1$Rate.100000)
 data1$X2022 <- as.numeric(data1$X2022)
 
+# Performing linear regression using Rate.100000 as the response variable and X2022 as the predictor
 reg_mod_inca <- lm(Rate.100000 ~ X2022, data = data1)
+
+# Displaying the summary of the linear regression model for Incarceration Rate
 summary(reg_mod_inca)
 
+# Plotting the relationship between Democracy Index (X2022) and Incarceration Rate (Rate.100000)
 plot(data1$X2022, data1$Rate.100000, xlab = "Democracy Index", ylab = "Incarnation Rate")
 abline(reg_mod_inca, col="red")
-
-
 ```
 
-YOUR ANALYSIS HERE
+On the first plot, that analyze the connection between the democracy index and GDP (PPP) per capita, we can see a strong connection and correlation, the regression line is clear and logical, there is some exceptions but the main are linked. We can conclude that the more the democracy index of a country is high, the more the GDP per capita will also be high.
+On a second hand, the second plot that analyse the connection between the democracy index and the incarnation rate doesn't show a real connection. The regression line is almost horizontal, the points are scattered and not really explaning the regression line.
 
 6.a. 
 ```{r, cache=TRUE} 

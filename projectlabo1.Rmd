@@ -199,13 +199,13 @@ top_averages
 bottom_averages
 ```
 
-*The top five countries in terms of the democracy index in 2022 are: Norway, New Zeland, Iceland, Sweden, Finland and Danmark
+- The top five countries in terms of the democracy index in 2022 are: Norway, New Zeland, Iceland, Sweden, Finland and Danmark
 
-*The bottom five countries in terms of the democracy index in 2022 are: Afghanistan, Myanmar, North Korea, Central African Republic, Syria and Democratic Republic of the Congo
+- The bottom five countries in terms of the democracy index in 2022 are: Afghanistan, Myanmar, North Korea, Central African Republic, Syria and Democratic Republic of the Congo
 
-*The top five countries according to the average index value of all the 15 years are: Norway, Iceland, Sweden, Danmark New Zeland, Finland. We can see that they are the same contries than the top five in 2022, just in a different order.
+- The top five countries according to the average index value of all the 15 years are: Norway, Iceland, Sweden, Danmark New Zeland, Finland. We can see that they are the same contries than the top five in 2022, just in a different order.
 
-*The top five countries according to the average index value of all the 15 years are: North Korea, Chad, Central African Republic, Syria, Turkmenistan, Democratic Republic of the Congo.
+- The top five countries according to the average index value of all the 15 years are: North Korea, Chad, Central African Republic, Syria, Turkmenistan, Democratic Republic of the Congo.
 
 
 
@@ -228,19 +228,19 @@ outliers <-list_by_country %>% group_by(Region) %>% summarise(outliers = paste(b
 outliers
 ```
 
-*We can see that for the region of Asia and Australasia, this is the region that have the biggest difference between the minimum index and the maximum, a large step may indicate that the data within that group exhibit a wide range of values. It has a median of approximately 6.25, the lower percentile at approximately 3.75 and the upper percentile at approximately 7.25. The majority of countries in this region are Flawed Democracys. It does not have any outliers.
+- We can see that for the region of Asia and Australasia, this is the region that have the biggest difference between the minimum index and the maximum, a large step may indicate that the data within that group exhibit a wide range of values. It has a median of approximately 6.25, the lower percentile at approximately 3.75 and the upper percentile at approximately 7.25. The majority of countries in this region are Flawed Democracys. It does not have any outliers.
 
-*For the Central and Eastern Europe region, the width of the box looks like the precedent region but their gap between the maximum and the minimum is smaller. It's median is approximately 6.25, the lower percentile at approximately 3.60 and the upper percentile at approximately 7.The majority of countries in this region are Flawed Democracy. It does not have any outliers. This region and the precedent are very alike.
+- For the Central and Eastern Europe region, the width of the box looks like the precedent region but their gap between the maximum and the minimum is smaller. It's median is approximately 6.25, the lower percentile at approximately 3.60 and the upper percentile at approximately 7.The majority of countries in this region are Flawed Democracy. It does not have any outliers. This region and the precedent are very alike.
 
-*For the Latin America and the Caribbean, the width of the box is a lot smaller than the two precedents regions, the small width indicates that the values are clustered closely together and have limited variability, but the gap between the minimum index and the maximum is big.  It has a median of approximately 6.25, the lower percentile at approximately 5 and the upper percentile at approximately 7.1. The majority of countries in this region are Flawed Democracy. It does not have any outliers.
+- For the Latin America and the Caribbean, the width of the box is a lot smaller than the two precedents regions, the small width indicates that the values are clustered closely together and have limited variability, but the gap between the minimum index and the maximum is big.  It has a median of approximately 6.25, the lower percentile at approximately 5 and the upper percentile at approximately 7.1. The majority of countries in this region are Flawed Democracy. It does not have any outliers.
 
-*For the Middle east and North Africa, the width of the box is smaller than the precedent region, the small width indicates that the values are clustered closely together and have limited variability, the gap between the minimum index and the maximum is also not big. It's median is the lowest of every regions and is approximately 3.1, the lower percentile at approximately 2.5 and the upper percentile at approximately 3.75. The majority of countries in this region are Authoritarian regimes. It does have one outlier at approximately 7.93.
+- For the Middle east and North Africa, the width of the box is smaller than the precedent region, the small width indicates that the values are clustered closely together and have limited variability, the gap between the minimum index and the maximum is also not big. It's median is the lowest of every regions and is approximately 3.1, the lower percentile at approximately 2.5 and the upper percentile at approximately 3.75. The majority of countries in this region are Authoritarian regimes. It does have one outlier at approximately 7.93.
 
-*For the North America, the width of the box is the smaller than every other regions, that is because it contains only two countries, and these two countries look alike as a term of the type of regime. The median is approximately 8.2 and it lower percentile, upper percentile, maximum and minimum are all between 7.75 and 9.The two countries seem to be or Flawed democracy or Full democracy. It does not have any outliers.
+- For the North America, the width of the box is the smaller than every other regions, that is because it contains only two countries, and these two countries look alike as a term of the type of regime. The median is approximately 8.2 and it lower percentile, upper percentile, maximum and minimum are all between 7.75 and 9.The two countries seem to be or Flawed democracy or Full democracy. It does not have any outliers.
 
-*For the Sub-Saharan Africa, the width of the box looks like the firsts two regions, this suggests that there is considerable variability in the variable being measured within that region.  It's median is approximately 3.75, the lower percentile at approximately 3.1 and the upper percentile at approximately 5.3. The democracy indexes can go from 1.25 to 8. The majority of countries in this region are Authoritarian regimes. It does not have any outlier.
+- For the Sub-Saharan Africa, the width of the box looks like the firsts two regions, this suggests that there is considerable variability in the variable being measured within that region.  It's median is approximately 3.75, the lower percentile at approximately 3.1 and the upper percentile at approximately 5.3. The democracy indexes can go from 1.25 to 8. The majority of countries in this region are Authoritarian regimes. It does not have any outlier.
 
-*For the Western Europe,  the width of the box is smaller than the precedent region, the small width indicates that the values are clustered closely together and have limited variability, the gap between the minimum index and the maximum is also not big, can go from 7.4 to 9.9. It's median is approximately 8, the lower percentile at approximately 7.8 and the upper percentile at approximately 8.9. The majority of countries in this region are Full democracy. This region looks a lot like the North America's region. It does have one outlier at approximately 4.35.
+- For the Western Europe,  the width of the box is smaller than the precedent region, the small width indicates that the values are clustered closely together and have limited variability, the gap between the minimum index and the maximum is also not big, can go from 7.4 to 9.9. It's median is approximately 8, the lower percentile at approximately 7.8 and the upper percentile at approximately 8.9. The majority of countries in this region are Full democracy. This region looks a lot like the North America's region. It does have one outlier at approximately 4.35.
 
 2.b. 
 ```{r, cache=TRUE} 
@@ -266,7 +266,7 @@ summary_table
 ```
 
 
-*Skewness is a statistical number that tells us if a distribution is symmetric or not.
+- Skewness is a statistical number that tells us if a distribution is symmetric or not.
 We can see on the table that we have created that the skewness or the distribution of north America is 0,therefor its distribution is symmetric.
 If a distribution is symmetric its a normal distribution, therefor its median, mean and mode are equals.
 f Skewness is greater than 0, then it is called right-skewed or that the right tail is longer than the left tail. If Skewness is less than 0, then it is called left-skewed or that the left tail is longer than the right tail.
@@ -274,7 +274,7 @@ f Skewness is greater than 0, then it is called right-skewed or that the right t
 The right-skewed regions are Middle East and North Africa and Sub-Saharan Africa.
 The left-skewed regions are Asia and Australasia,Central and Eastern Europe, Latin America and the Caribbean and Western Europe.
 
-*Kurtosis is a statistical number that tells us if a distribution is taller or shorter than a normal distribution. If a distribution is similar to the normal distribution, the Kurtosis value is 0. If Kurtosis is greater than 0, then it has a higher peak compared to the normal distribution. If Kurtosis is less than 0, then it is flatter than a normal distribution.
+- Kurtosis is a statistical number that tells us if a distribution is taller or shorter than a normal distribution. If a distribution is similar to the normal distribution, the Kurtosis value is 0. If Kurtosis is greater than 0, then it has a higher peak compared to the normal distribution. If Kurtosis is less than 0, then it is flatter than a normal distribution.
 
 In our case all the regions Kurtosis are greater than 0, therefor they all have a higher peak compared to the normal distribution.
 
@@ -380,21 +380,21 @@ Comparing_countries(list_by_country, other_countries)
 ```
 
 
-*First cluster: we can see that the three countries began with a small index between 2 and 3 in 2006 and all end up with an index between 3 and 6. Tunisia had the biggest on his pic in 2015.
+- First cluster: we can see that the three countries began with a small index between 2 and 3 in 2006 and all end up with an index between 3 and 6. Tunisia had the biggest on his pic in 2015.
 
-*Second cluster: we can see 13 countries that all finished with a democracy index a lot lower in 2022 than in 2006. The one that knew his biggest drop is Afghanistan.
+- Second cluster: we can see 13 countries that all finished with a democracy index a lot lower in 2022 than in 2006. The one that knew his biggest drop is Afghanistan.
 
-*Third cluster: we can see 14 countries that all finished with a democracy index a a little bit bigger in 2022 than in 2006. For example we can see that Uruguay began with an index a around 7.95 and finished in 2022 with an index around 8.9
+- Third cluster: we can see 14 countries that all finished with a democracy index a a little bit bigger in 2022 than in 2006. For example we can see that Uruguay began with an index a around 7.95 and finished in 2022 with an index around 8.9
 
-*Fourth cluster: we can see countries that all finished with a democracy index a a little bit lower in 2022 than in 2006. For example we can see that Myanmar began with an index a around 1.7 and finished in 2022 with an index around 0.7.
+- Fourth cluster: we can see countries that all finished with a democracy index a a little bit lower in 2022 than in 2006. For example we can see that Myanmar began with an index a around 1.7 and finished in 2022 with an index around 0.7.
 
-*Fifth cluster: we can see 7 countries that dropped by at least 0.75 points after 2006 and then recovered by at least 0.75 points in 2022 compared to the lowest drop. For example, Gambia had a democracy index of approximately 4.5 in 2006, knew his lowest drop in 2016 around 3 and then recovered by 2022 at approximately 4.4.
+- Fifth cluster: we can see 7 countries that dropped by at least 0.75 points after 2006 and then recovered by at least 0.75 points in 2022 compared to the lowest drop. For example, Gambia had a democracy index of approximately 4.5 in 2006, knew his lowest drop in 2016 around 3 and then recovered by 2022 at approximately 4.4.
 
-*Sixth cluster: similarly, we can see 10 countries that increased by at least 0.75 points after 2006 and then dropped by at least 0.75 points in 2022 compared to their highest point. For example, Libya had a democracy index of approximately 2 in 2006, knew his  highest point in 2012 around 5 and then dropped by 2022 at approximately 2.
+- Sixth cluster: similarly, we can see 10 countries that increased by at least 0.75 points after 2006 and then dropped by at least 0.75 points in 2022 compared to their highest point. For example, Libya had a democracy index of approximately 2 in 2006, knew his  highest point in 2012 around 5 and then dropped by 2022 at approximately 2.
 
-*Seventh cluster: we can see countries that had barely changed from 2006 to 2022, i.e. that the difference between their highest and lowest index was less than 0.5 points. For example Chad had his higher index in 2021 at 1.67 and his lowest index in 2013 at 1.5.
+- Seventh cluster: we can see countries that had barely changed from 2006 to 2022, i.e. that the difference between their highest and lowest index was less than 0.5 points. For example Chad had his higher index in 2021 at 1.67 and his lowest index in 2013 at 1.5.
 
-*Height cluster: all the rest of the countries that did not fit on any of the seven clusters.
+- Height cluster: all the rest of the countries that did not fit on any of the seven clusters.
 
 4.
 ```{r, cache=TRUE} 
@@ -436,9 +436,9 @@ heatmap(prob_table, col = colorRampPalette(c("white", "green"))(20), main = "Reg
 
 This table shows the probabilities of transitioning from one regime type to another. Each row represents the starting regime type, and each column represents the ending regime type. The values in the table represent the probabilities of transitioning from the starting regime type to the ending regime type. For example:
 
-*The probability of transitioning from an Authoritarian regime to another Authoritarian regime is 0.83636364.
-*The probability of transitioning from a Flawed democracy to a Full democracy is 0.07547170.
-*The probability of transitioning from a Hybrid regime to an Authoritarian regime is 0.36363636.
+- The probability of transitioning from an Authoritarian regime to another Authoritarian regime is 0.83636364.
+- The probability of transitioning from a Flawed democracy to a Full democracy is 0.07547170.
+- The probability of transitioning from a Hybrid regime to an Authoritarian regime is 0.36363636.
 
 On the heat map we can see that a Hybrid regime has a probability of 0 to become an authoritarian regime. But a Flawed democracy has some chances to become authoritarian.
 

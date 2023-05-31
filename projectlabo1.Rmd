@@ -175,18 +175,27 @@ head(components)
 
 1.b. 
 ```{r, cache=TRUE} 
+# Select the top 5 countries with the highest democracy index in 2022
 top <- select(list_by_country,Country,X2022) %>% arrange(desc(X2022)) %>% head() 
+
+# Select the bottom 5 countries with the lowest democracy index in 2022
 bottom <- select(list_by_country,Country,X2022) %>% arrange(X2022) %>% head() 
 
+# Display the top and bottom countries
+top
+bottom
 
+# Calculate the average democracy index for each country
 averages <- list_by_country %>%
   mutate(avg = rowMeans(select(., 5:19), na.rm = TRUE)) %>%
   select(Country, avg)
 
+# Select the top 5 countries with the highest average democracy index and the bottom 5 countries with the lowest average democracy index
 top_averages<- averages %>% arrange(desc(avg)) %>% head() 
-top_averages
-
 bottom_averages<- averages %>% arrange(avg) %>% head() 
+
+# Display the top and bottom countries based on average democracy index
+top_averages
 bottom_averages
 ```
 
@@ -202,7 +211,7 @@ bottom_averages
 
 2.a. 
 ```{r, cache=TRUE} 
-
+# Create a boxplot showing the distribution of democracy index in 2022 by region
 ggplot(list_by_country, aes(x = Region, y = `X2022`, fill = Region)) +
   geom_boxplot() +
   xlab("Region") +
@@ -212,9 +221,10 @@ ggplot(list_by_country, aes(x = Region, y = `X2022`, fill = Region)) +
         axis.text.x = element_text(angle = 45, hjust = 1.1, vjust = 1),
         plot.title = element_text(face = "bold", hjust = 0.5))
 
-
+# Find the outliers for each region
 outliers <-list_by_country %>% group_by(Region) %>% summarise(outliers = paste(boxplot.stats(`X2022`)$out, collapse = ", "))
 
+# Display the outliers for each region
 outliers
 ```
 
@@ -234,7 +244,7 @@ outliers
 
 2.b. 
 ```{r, cache=TRUE} 
-# Create density plot
+# Create a density plot to visualize the distribution of the democracy index in 2022 by region
 ggplot(list_by_country, aes(x = `X2022`, fill = Region)) +
   geom_density(alpha = 0.2) +
   xlab("Democracy Index 2022") +
@@ -242,7 +252,7 @@ ggplot(list_by_country, aes(x = `X2022`, fill = Region)) +
   ggtitle("Density Plot by Region") +
   theme(legend.position = "top")
 
-# Compute summary statistics
+# Compute summary statistics for each region
 summary_table <- list_by_country %>%
   group_by(Region) %>%
   summarize(
@@ -273,7 +283,10 @@ As we saw in the precedent question, the region Asia and Australasia has a big v
 
 3.a. 
 ```{r, cache=TRUE} 
+# Define a function to compare democracy index across countries
 Comparing_countries <- function(data, country_names) {
+  
+# Check if the data has a column named "Country", otherwise use "Region"
   
   if ("Country" %in% colnames(data)) {
     place_col <- "Country"
@@ -281,34 +294,39 @@ Comparing_countries <- function(data, country_names) {
     place_col <- "Region"
   } 
    
+# Extract the year columns from the data
   year_cols <- grep("^X[0-9]{4}$", colnames(data), value = TRUE)
   years <- unique(as.numeric(substr(year_cols, 2,5)))
 
+# Filter the data for the specified country names
   fil_data <- data[data[[place_col]] %in% country_names, ]
   color <- rainbow(length(country_names))
 
+# Create an empty plot with appropriate axes labels and title
   plot(NULL, xlim = range(years), ylim = c(0, 10),
        xlab = "Year", ylab = "Democracy Index",
        main = "Democracy Index for Countries")  
- 
+
+  # Set the x-axis ticks to the years
   axis(1, at = years, labels = years)
 
+# Loop through each country and plot its democracy index over the years
   for (i in 1:length(country_names)) {
     place <- country_names[i]
     country_data <- fil_data[fil_data[[place_col]] == place, ]
     lines(years, t(country_data[year_cols]), type = "l", col = color[i])
   }
-  
+
+# Add a legend to the plot showing the country names and corresponding colors
   legend("bottomright", inset = 0.02, legend = country_names,
          col = color, pch = 19, bty = "n")
 
 }
    
-
-Comparing_countries(list_by_region, c("Asia and Australasia", "Sub-Saharan Africa"))
+# Call the Comparing_countries function with a specific set of country names
+Comparing_countries(list_by_country, c("France", "United States", "Israel", "Cameroon", "Morocco"))
 
 ```
-
 
 First, we can observe that there is 3 countries that look alike, where their democracy indexes did not change a lot over the years and stayed high: France, United states and Israel. 
 Second, the 2 other countries, Cameroon and Morocco, looked alike from the year 2006 to 2014, but from the year 2015 they changed in the opposite way. Morocco began te be a little bo democratic an Cameroon a little less.
@@ -317,38 +335,40 @@ Second, the 2 other countries, Cameroon and Morocco, looked alike from the year 
 
 3.b. 
 ```{r, cache=TRUE} 
+# Calculate the difference in democracy index between 2022 and 2006
 index_diff <- list_by_country$X2022 - list_by_country$X2006
-#first cluster
+# First cluster - Countries with a big increase in democracy index
 big_increase_cluster <- list_by_country[index_diff >= 1.5, "Country"]
-#second cluster
+# Second cluster - Countries with a big decrease in democracy index
 big_decrease_cluster <- list_by_country[index_diff <= -1.5, "Country"]
-#third cluster
+# Third cluster - Countries with a small increase in democracy index
 small_increase_cluster <- list_by_country[index_diff > 0.75 & index_diff <= 1.5, "Country"]
-#fourth cluster
+# Fourth cluster - Countries with a small decrease in democracy index
 small_decrease_cluster <- list_by_country[index_diff < -0.75 & index_diff >= -1.5, "Country"]
 
+# Calculate the minimum index for each country
 list_by_country$min_index <- apply(list_by_country[, 6:19], 1, min)
 
-#fifth cluster
+# Fifth cluster - Countries with an increase in democracy index compared to the minimum index in 2006
 index_min_diff_2006 <- list_by_country$X2006 - list_by_country$min_index
 index_min_diff_2022 <- list_by_country$X2022 - list_by_country$min_index
-
 decrease_increase <- list_by_country$Country[index_min_diff_2006 >= 0.75 & index_min_diff_2022 >= 0.75]
 
-#sixth cluster
+# Calculate the maximum index for each country
 list_by_country$max_index <- apply(list_by_country[, 6:19], 1, max)
+
+# Sixth cluster - Countries with a decrease in democracy index compared to the maximum index in 2006
 index_max_diff_2006 <- list_by_country$X2006 - list_by_country$max_index
 index_max_diff_2022 <- list_by_country$X2022 - list_by_country$max_index
 increase_decrease <- list_by_country$Country[index_max_diff_2006 <= -0.75 & index_max_diff_2022 <= -0.75]
 
-#seventh cluster
+# Seventh cluster - Countries with minimal change in democracy index (small difference between max and min)
 bare_change <- list_by_country$Country[list_by_country$max_index-list_by_country$min_index < 0.5 ]
 
-#height cluster
+# Height cluster - Other countries not included in the previous clusters
 other_countries <- list_by_country$Country[!(list_by_country$Country %in% c(big_increase_cluster,big_decrease_cluster,small_increase_cluster, small_decrease_cluster, decrease_increase, increase_decrease, bare_change))]
 
-#comparing countries
-
+# Call the Comparing_countries function to compare countries within each cluster
 Comparing_countries(list_by_country, big_increase_cluster)
 Comparing_countries(list_by_country, big_decrease_cluster)
 Comparing_countries(list_by_country, small_increase_cluster)
@@ -381,37 +401,46 @@ Comparing_countries(list_by_country, other_countries)
 # Step 1: Filter the data table for 2006 and 2022
 data_for_freq <- select(list_by_country,Country,X2006,X2022)
 
-
+# Initialize empty columns for regime types
 data_for_freq$Regime_Type_2006 <- NA
 data_for_freq$Regime_Type_2022 <- NA
 
-# Assign regime type based on score conditions
+# Assign regime type based on score conditions for 2006
 data_for_freq$Regime_Type_2006 <- ifelse(data_for_freq$X2006 >= 8.01 & data_for_freq$X2006 <= 10, "Full democracies",
                               ifelse(data_for_freq$X2006 >= 6.01 & data_for_freq$X2006 <= 8, "Flawed democracies",
                               ifelse(data_for_freq$X2006 >= 4.01 & data_for_freq$X2006 <= 6, "Hybrid regimes",
                               ifelse(data_for_freq$X2006 >= 0 & data_for_freq$X2006 <= 4, "Authoritarian regimes", NA))))
 
+# Assign regime type based on score conditions for 2022
 data_for_freq$Regime_Type_2022 <- ifelse(data_for_freq$X2022 >= 8.01 & data_for_freq$X2022 <= 10, "Full democracies",
                               ifelse(data_for_freq$X2022 >= 6.01 & data_for_freq$X2022 <= 8, "Flawed democracies",
                               ifelse(data_for_freq$X2022 >= 4.01 & data_for_freq$X2022 <= 6, "Hybrid regimes",
                               ifelse(data_for_freq$X2022 >= 0 & data_for_freq$X2022 <= 4, "Authoritarian regimes", NA))))
 
+# Create a contingency table of regime types for 2006 and 2022
 data_for_freqs <- table(data_for_freq$Regime_Type_2006 ,data_for_freq$Regime_Type_2022)
 
+# Compute transition probabilities
 transition_probabilities <- prop.table(data_for_freqs, margin = 1)
 transition_probabilities
 
+# Define the categories for regime types
 regime_categories <- c("Full democracy", "Flawed democracy", "Hybrid regime", "Authoritarian")
+
+# Create a matrix of transition probabilities with row and column names
 prob_table <- matrix(transition_probabilities, nrow = 4, byrow = TRUE, dimnames = list(regime_categories, regime_categories))
 
-print(prob_table)
-
-# Create a heatmap
+# Create a heatmap to visualize the regime transition probabilities
 heatmap(prob_table, col = colorRampPalette(c("white", "green"))(20), main = "Regime Transition Probabilities")
 ```
 
-YOUR ANALYSIS HERE
+This table shows the probabilities of transitioning from one regime type to another. Each row represents the starting regime type, and each column represents the ending regime type. The values in the table represent the probabilities of transitioning from the starting regime type to the ending regime type. For example:
 
+*The probability of transitioning from an Authoritarian regime to another Authoritarian regime is 0.83636364.
+*The probability of transitioning from a Flawed democracy to a Full democracy is 0.07547170.
+*The probability of transitioning from a Hybrid regime to an Authoritarian regime is 0.36363636.
+
+On the heat map we can see that a Hybrid regime has a probability of 0 to become an authoritarian regime. But a Flawed democracy has some chances to become authoritarian.
 
 
 5.a. 

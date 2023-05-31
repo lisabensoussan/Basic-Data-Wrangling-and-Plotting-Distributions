@@ -246,19 +246,20 @@ summary_table <- list_by_country %>%
 summary_table
 ```
 
-YOUR ANALYSIS HERE
 
-Skewness is a statistical number that tells us if a distribution is symmetric or not.
-We can see on the table that we have created that the skewness od the distribution of north America is 0,therfor its distribution is symmetric.
-If a distribution is symmetric its a normal distribution, therfor its median, mean and mode are equals.
+*Skewness is a statistical number that tells us if a distribution is symmetric or not.
+We can see on the table that we have created that the skewness or the distribution of north America is 0,therefor its distribution is symmetric.
+If a distribution is symmetric its a normal distribution, therefor its median, mean and mode are equals.
 f Skewness is greater than 0, then it is called right-skewed or that the right tail is longer than the left tail. If Skewness is less than 0, then it is called left-skewed or that the left tail is longer than the right tail.
 
 The right-skewed regions are Middle East and North Africa and Sub-Saharan Africa.
 The left-skewed regions are Asia and Australasia,Central and Eastern Europe, Latin America and the Caribbean and Western Europe.
 
-Kurtosis is a statistical number that tells us if a distribution is taller or shorter than a normal distribution. If a distribution is similar to the normal distribution, the Kurtosis value is 0. If Kurtosis is greater than 0, then it has a higher peak compared to the normal distribution. If Kurtosis is less than 0, then it is flatter than a normal distribution.
+*Kurtosis is a statistical number that tells us if a distribution is taller or shorter than a normal distribution. If a distribution is similar to the normal distribution, the Kurtosis value is 0. If Kurtosis is greater than 0, then it has a higher peak compared to the normal distribution. If Kurtosis is less than 0, then it is flatter than a normal distribution.
 
-In our case all the regions distributivities are greather than 0, therfor they all have a higher peak compared to the normal distribution.
+In our case all the regions Kurtosis are greater than 0, therefor they all have a higher peak compared to the normal distribution.
+
+As we saw in the precedent question, the region Asia and Australasia has a big variance and on the contrary the region North America has a very low variance. Furthermore, we can conclude that in average the countries of the regions Asia and Australasia, Central and Eastern Europe, Latin America and the Caribbean and Sub-Saharan Africa have an hybrid regime; on average the countries in the Middle East and North Africa have an Authoritarian regime and the countries in North America and Western Europe have on average Full democracies.
 
 
 3.a. 

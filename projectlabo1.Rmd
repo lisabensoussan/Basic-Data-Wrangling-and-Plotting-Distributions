@@ -542,25 +542,12 @@ On a second hand, the second plot that analyse the connection between the democr
 
 6.a. 
 ```{r, cache=TRUE} 
-sampled_gdp <- sample(joined_table$X2022, size = 1000, replace = TRUE)
+colnames(gdp_table)[colnames(gdp_table) == "CIA.8..9..10."] <- "CIA.est"
+colnames(gdp_table)[colnames(gdp_table) == "CIA.8..9..10..1"] <- "CIA.year"
 
-# Compute empirical CDF
-empirical_cdf <- ecdf(sampled_gdp)
-
-# Generate a sequence of values
-x <- seq(min(sampled_gdp), max(sampled_gdp), length.out = 100)
-
-# Calculate empirical CDF values for the sequence of x values
-y <- empirical_cdf(x)
-
-# Create a data frame with x and y values
-cdf_data <- data.frame(x, y)
-
-# Plot the empirical CDF
-ggplot(cdf_data, aes(x = x, y = y)) +
-  geom_step() +
-  labs(x = "GDP (PPP) per capita", y = "Empirical CDF") +
-  ggtitle("Empirical CDF of GDP (PPP) per capita for a Randomly Selected Country")
+x <- na.omit(as.numeric(gdp_table$CIA.est))
+x_ecdf <- ecdf(x)
+plot(x_ecdf, xlab ="x", ylab="ECDF", main= "Empirical CDF", col.main="blue", pch = 16)
 ```
 
 On this plot we can see the cdf of gdp per capita of a randomly selected group of a 1,000 countries out of all the counties data.
@@ -570,33 +557,24 @@ We can also see where x is located on that scale, where x is also a randomly sel
 
 6.b. 
 ```{r, cache=TRUE} 
-library(ggplot2)
-
+# Fix the data types
 joined_table$Population <- as.numeric(joined_table$Population)
+joined_table$CIA.est <- as.numeric(joined_table$CIA.est)
 
-# Randomly sample GDP values for a selected person
-sampled_gdp_person <- sample(joined_table$X2022, size = 55, replace = TRUE)
+# Filter out non-finite values in GDP per capita and population CDF
+filtered_data <- na.omit(joined_table[, c("CIA.est", "Population")])
 
+# Compute the cumulative sum of the population size
+population_cdf <- cumsum(filtered_data$Population) / sum(filtered_data$Population)
 
-# Filter out non-numeric and missing values from GDP
-filtered_gdp_person <- na.omit(as.numeric(sampled_gdp_person))
+# Compute the empirical CDF using the filtered GDP per capita values
+ecdf_person <- ecdf(filtered_data$CIA.est)
 
-# Calculate the cumulative sum of the population size
-population_cdf <- cumsum(joined_table$Population) / sum(joined_table$Population)
-
-# Create a data frame with filtered GDP values and population CDF
-cdf_data_person <- data.frame(GDP = filtered_gdp_person, PopulationCDF = population_cdf)
-
-# Sort the data frame by GDP values
-cdf_data_person <- cdf_data_person[order(cdf_data_person$GDP), ]
-
-# Plot the empirical CDF for GDP and population
-ggplot() +
-  geom_step(data = cdf_data_person, aes(x = GDP, y = PopulationCDF), color = "red", linewidth = 1) +
-  labs(x = "GDP (PPP) per capita", y = "Empirical CDF", title = "Empirical CDF of GDP (PPP) per capita") +
-  scale_x_log10() +
-  scale_y_continuous(limits = c(0, 1)) +
-  theme_minimal()
+# Plot the empirical CDF
+ggplot(data.frame(GDP = filtered_data$CIA.est, PopulationCDF = population_cdf), aes(x = GDP, y = PopulationCDF)) +
+  stat_ecdf() +
+  labs(x = "GDP per capita", y = "Cumulative Probability") +
+  scale_x_continuous(limits = c(0, 200000))
 ```
 
 The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly uniformly selected person out of all the countries.
@@ -609,58 +587,62 @@ The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly unifor
 colnames(joined_table)[colnames(joined_table) == "Landin.km2..mi2."] <- "LandArea"
 land_area <- as.numeric(joined_table$LandArea)
 
-# Remove non-numeric and missing values from X2022 column
-x2022_numeric <- as.numeric(joined_table$X2022)
-x2022_clean <- x2022_numeric[!is.na(x2022_numeric)]
 
-# Sample GDP values for a person
-sampled_gdp_person <- sample(x2022_clean, size = 55, replace = TRUE)
+# Remove numbers in parentheses from LandArea column
+joined_table$LandArea <- gsub("\\s*\\(.*\\)", "", joined_table$LandArea)
 
-# Sample GDP values for land area
-sampled_gdp_land_area <- sample(x2022_clean, size = 55, replace = TRUE)
+# Convert LandArea column to numeric format
+joined_table$LandArea <- as.numeric(joined_table$LandArea)
 
-# Calculate the cumulative distribution of land area
-land_area_cdf <- cumsum(land_area) / sum(land_area)
 
-# Calculate the empirical CDF for the sampled GDP values based on person
-empirical_cdf_person <- ecdf(sampled_gdp_person)
 
-# Generate a sequence of GDP values
-gdp_values <- seq(min(sampled_gdp_person), max(sampled_gdp_person), length.out = 100)
+# Filter out non-finite values in Land Area and GDP per capita
+filtered_dat <- na.omit(joined_table[, c("LandArea", "CIA.est")])
 
-# Calculate the empirical CDF for the sampled GDP values based on land area
-empirical_cdf_land_area <- ecdf(sampled_gdp_land_area)
+# Compute the cumulative sum of land area
+land_area_cdf <- cumsum(filtered_dat$Land.Area) / sum(filtered_dat$Land.Area)
 
-# Calculate the cumulative probabilities using the empirical CDF based on land area
-cdf_values_land_area <- empirical_cdf_land_area(gdp_values)
+# Compute the empirical CDF for Z using land area
+ecdf_location <- ecdf(filtered_dat$CIA.est)
 
-# Create a data frame with GDP values and their corresponding cumulative probabilities based on land area
-cdf_data_land_area <- data.frame(GDP = gdp_values, Probability = cdf_values_land_area)
+# Generate a sequence of values for plotting the ECDF
+x <- seq(0, 200000, length.out = 1000)
+
+# Create a data frame for plotting
+df <- data.frame(LandArea = x, CDF = ecdf_location(x))
 
 # Plot the empirical CDF for Z
-ggplot(cdf_data_land_area, aes(x = GDP, y = Probability)) +
+library(ggplot2)
+ggplot(df, aes(x = LandArea, y = CDF)) +
   geom_step() +
-  labs(x = "GDP (PPP) per capita", y = "Empirical CDF") +
-  ggtitle("Empirical CDF of GDP (PPP) per capita for a Randomly Selected Person (Uniformly from Land Area)")
+  labs(x = "Land Area (km^2)", y = "Empirical CDF", title = "Empirical CDF of GDP per capita based on Land Area")
 
-# Calculate the median, 25th percentile, and 75th percentile for X, Y, and Z
-percentiles <- c(0.25, 0.5, 0.75)
-x_percentiles <- quantile(x2022_clean, percentiles)
-y_percentiles <- quantile(sampled_gdp_person, percentiles)
-z_percentiles <- quantile(sampled_gdp_land_area, percentiles)
+# Compare median, 25th percentile, and 75th percentile of X, Y, and Z
 
-# Print the results
-cat("X - Median:", x_percentiles[2], "\n")
-cat("X - 25th Percentile:", x_percentiles[1], "\n")
-cat("X - 75th Percentile:", x_percentiles[3], "\n\n")
 
-cat("Y - Median:", y_percentiles[2], "\n")
-cat("Y - 25th Percentile:", y_percentiles[1], "\n")
-cat("Y - 75th Percentile:", y_percentiles[3], "\n\n")
 
-cat("Z - Median:", z_percentiles[2], "\n")
-cat("Z - 25th Percentile:", z_percentiles[1], "\n")
-cat("Z - 75th Percentile:", z_percentiles[3], "\n")
+# Calculate the median of x_ecdf if it is a numeric vector
+median_X <- median(x)
+median_Y <- median(filtered_dat$CIA.est)
+median_Z <- median(filtered_dat$CIA.est/filtered_dat$Land.Area)
+
+percentile_25_X <- quantile(x, 0.25, na.rm = TRUE)
+percentile_25_Y <- quantile(filtered_dat$CIA.est, 0.25)
+percentile_25_Z <- quantile(filtered_dat$CIA.est / filtered_dat$Land.Area, 0.25)
+
+percentile_75_X <- quantile(x, 0.75, na.rm = TRUE)
+percentile_75_Y <- quantile(filtered_dat$CIA.est, 0.75)
+percentile_75_Z <- quantile(filtered_dat$CIA.est / filtered_dat$Land.Area, 0.75)
+
+# Compare the values
+comparison <- data.frame(Variable = c("X", "Y", "Z"),
+                         Median = c(median_X, median_Y, median_Z),
+                         Percentile_25 = c(percentile_25_X, percentile_25_Y, percentile_25_Z),
+                         Percentile_75 = c(percentile_75_X, percentile_75_Y, percentile_75_Z))
+
+
+comparison
+
 ```
 
 YOUR ANALYSIS HERE

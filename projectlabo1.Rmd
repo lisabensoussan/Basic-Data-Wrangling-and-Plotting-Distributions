@@ -563,7 +563,9 @@ ggplot(cdf_data, aes(x = x, y = y)) +
   ggtitle("Empirical CDF of GDP (PPP) per capita for a Randomly Selected Country")
 ```
 
-YOUR ANALYSIS HERE
+On this plot we can see the cdf of gdp per capita of a randomly selected group of a 1,000 countries out of all the counties data.
+the X axis on the graph represents the GDP per capita, and the Y axis represents the Empirical cdf. 
+We can also see where x is located on that scale, where x is also a randomly selected country.
 
 
 6.b. 
@@ -574,6 +576,7 @@ joined_table$Population <- as.numeric(joined_table$Population)
 
 # Randomly sample GDP values for a selected person
 sampled_gdp_person <- sample(joined_table$X2022, size = 55, replace = TRUE)
+
 
 # Filter out non-numeric and missing values from GDP
 filtered_gdp_person <- na.omit(as.numeric(sampled_gdp_person))
@@ -596,7 +599,9 @@ ggplot() +
   theme_minimal()
 ```
 
-YOUR ANALYSIS HERE
+The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly uniformly selected person out of all the countries.
+
+
 
 
 6.c. 
@@ -711,10 +716,12 @@ ggplot(na.omit(joined_table[, c("Rate.100000", "X2022")]), aes(x = X2022, y = Ra
   ggtitle("Scatter Plot of Rate Incarceration vs. Democracy Index with Regression Line")
 ```
 
-YOUR ANALYSIS HERE
-
-
-
+We calculated the average democracy score between 2006 and 2022 for each country.
+then we created a scale representing the scores- from the lowest average (1.06) and colored it close to white, the higest (9.83) as red.
+the countries received colors based on the scale colors (white to red).
+By reviewing the results we can say that countries on the West side of the map are the most democratic.
+Countries in the South-EAST edge and Europe  are very democratic as well.
+On the other hand, Africa, the middle east and the East-South countries have low democratic scores (with exceptions).
 
 8.a. 
 ```{r, cache=TRUE} 
@@ -747,8 +754,13 @@ corrplot(cor_matrix, method = "color", type = "upper",
          tl.col = "black", tl.srt = 45)
 ```
 
-YOUR ANALYSIS HERE
+In the first data table we have presented the top five.
 
+In the heatmap of the five democracy elements correlations we can see that the 2 pairs -  Electoral process and pluralism (EEP) and Civil liberties (CL), Functioning of government(FG) and Civil liberties,have the highest  correlations (above 0.8).
+We can say that the following pairs have highest correlations : (EPP ,FG),(EPP ,Political Prticipation(PP)), (PP, CL).
+The lowest pairs are: (EPP,Political culture) and (Political Participation,Political culture).
+
+Generally speaking, if the color is darker than it has a stronger correlation.
 
 8.b. 
 ```{r, cache=TRUE} 

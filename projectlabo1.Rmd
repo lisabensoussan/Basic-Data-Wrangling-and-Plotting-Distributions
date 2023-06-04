@@ -686,34 +686,14 @@ mapCountryData(world_map, nameColumnToPlot = "avg", mapTitle = "Average Value",
 
 
 table_2006 <- select(list_by_country,Country,c(19))
-mapCountryData(world_map, nameColumnToPlot = "X2006…
-[16:39, 30/05/2023] Lisa Stat : 5.bjoined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
-colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
-colnames(joined_table)[colnames(joined_table) == "IMF.5..6..1"] <- "IMF.year"
-colnames(joined_table)[colnames(joined_table) == "World.Bank.7."] <- "World.bank.est"
-colnames(joined_table)[colnames(joined_table) == "World.Bank.7..1"] <- "World.bank.year"
-colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10."] <- "CIA.est"
-colnames(joined_table)[colnames(joined_table) == "CIA.8..9..10..1"] <- "CIA.year"
-
-reg_mod_cia <- lm(`CIA.est` ~ X2022, data = na.omit(joined_table[, c("CIA.est", "X2022")]))
-summary(reg_mod_cia)
-
-ggplot(na.omit(joined_table[, c("CIA.est", "X2022")]), aes(x = X2022, y = CIA.est)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(x = "Democracy Index 2022", y = "GDP (PPP) per capita") +
-  ggtitle("Scatter Plot of GDP vs. Democracy Index with Regression Line")
+mapCountryData(world_map, nameColumnToPlot = "X2006", mapTitle = "2006 Values",
+               catMethod = "fixedWidth", numCats = 10, missingCountryCol = "white", addLegend = TRUE, oceanCol = "lightblue")
 
 
-colnames(joined_table)[colnames(joined_table) == "Rate.per.100.000..3."] <- "Rate.100000"
-reg_mod_inca <- lm(`Rate.100000` ~ X2022, data = na.omit(joined_table[, c("Rate.100000", "X2022")]))
-summary(reg_mod_inca)
-
-ggplot(na.omit(joined_table[, c("Rate.100000", "X2022")]), aes(x = X2022, y = Rate.100000)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(x = "Democracy Index 2022", y = "Rate incarceration (per 100,000)") +
-  ggtitle("Scatter Plot of Rate Incarceration vs. Democracy Index with Regression Line")
+table_2022 <- select(list_by_country,Country,c(5))
+table_2006 <- select(list_by_country,Country,c(19))
+mapCountryData(world_map, nameColumnToPlot = "X2022", mapTitle = "2022 Values",
+               catMethod = "fixedWidth", numCats = 10, missingCountryCol = "white", addLegend = TRUE, oceanCol = "lightblue")
 ```
 
 We calculated the average democracy score between 2006 and 2022 for each country.
@@ -760,7 +740,7 @@ In the heatmap of the five democracy elements correlations we can see that the 2
 We can say that the following pairs have highest correlations : (EPP ,FG),(EPP ,Political Prticipation(PP)), (PP, CL).
 The lowest pairs are: (EPP,Political culture) and (Political Participation,Political culture).
 
-Generally speaking, if the color is darker than it has a stronger correlation.
+Generally speaking, if the color is darker than it has a stronger correlati
 
 8.b. 
 ```{r, cache=TRUE} 

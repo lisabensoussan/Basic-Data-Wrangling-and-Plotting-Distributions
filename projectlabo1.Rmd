@@ -561,20 +561,22 @@ We can also see where x is located on that scale, where x is also a randomly sel
 joined_table$Population <- as.numeric(joined_table$Population)
 joined_table$CIA.est <- as.numeric(joined_table$CIA.est)
 
-# Filter out non-finite values in GDP per capita and population CDF
-filtered_data <- na.omit(joined_table[, c("CIA.est", "Population")])
+gdp_pers<-joined_table%>%select(Country,CIA.est,Population)
+gdp_pers<-na.omit(gdp_pers)
 
-# Compute the cumulative sum of the population size
-population_cdf <- cumsum(filtered_data$Population) / sum(filtered_data$Population)
+#Transforming the vector gdp_area$Landin.km2..mi2. to numeric and then rounding the values to the nearest integer
+gdp_pers$Population<-round(gdp_pers$Population)
 
-# Compute the empirical CDF using the filtered GDP per capita values
-ecdf_person <- ecdf(filtered_data$CIA.est)
+#Step 2 --> Calculating for every country the probability of selecting a person from that country. This will then be the fourth column in the data-base `gdp_area`. 
 
-# Plot the empirical CDF
-ggplot(data.frame(GDP = filtered_data$CIA.est, PopulationCDF = population_cdf), aes(x = GDP, y = PopulationCDF)) +
-  stat_ecdf() +
-  labs(x = "GDP per capita", y = "Cumulative Probability") +
-  scale_x_continuous(limits = c(0, 200000))
+gdp_pers<-gdp_pers%>%mutate(Weights=gdp_pers$Population/sum(gdp_pers$Population))
+
+
+#Step 3 --> Calculating the weighted empirical CDF function with the function `ewcdf()`. This function simply calculates the ecdf of the vector `gdp_area$CIA.8..9..10.` but weights every value with the vector `gdp_area$Weights`.
+
+ecdf_Y<-ewcdf(gdp_pers$CIA.est,weights=gdp_pers$Weights)
+
+plot(ecdf_Y,xlab="GDP (PPP) per capita in Int$",ylab="EWCDF",main="EW-CDF of GDP per capita of a randomly selected person",sub="(Weighted by Population of a person's country)" ,col.main="blue",col.sub="blue",pch=16,verticals=TRUE,do.points=FALSE)
 ```
 
 The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly uniformly selected person out of all the countries.
@@ -587,52 +589,46 @@ The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly unifor
 colnames(joined_table)[colnames(joined_table) == "Landin.km2..mi2."] <- "LandArea"
 land_area <- as.numeric(joined_table$LandArea)
 
-
 # Remove numbers in parentheses from LandArea column
 joined_table$LandArea <- gsub("\\s*\\(.*\\)", "", joined_table$LandArea)
 
 # Convert LandArea column to numeric format
 joined_table$LandArea <- as.numeric(joined_table$LandArea)
 
+#Step 1 --> Creating a new data-frame `gdp_area` with three columns: one with the name of a country, one with the GDP per capita of that country and one with the land-area of that country. Then removing all NA values. Also transforming the vector gdp_area$Landin.km2..mi2. to numeric and rounding the values to the neareast integer.
+
+gdp_area<-joined_table%>%select(Country,CIA.est,LandArea)
+gdp_area<-na.omit(gdp_area)
+
+#Transforming the vector gdp_area$Landin.km2..mi2. to numeric and then rounding the values to the nearest integer
+gdp_area$LandArea<-as.numeric(gdp_area$LandArea)
+gdp_area$LandArea<-round(gdp_area$LandArea)
 
 
-# Filter out non-finite values in Land Area and GDP per capita
-filtered_dat <- na.omit(joined_table[, c("LandArea", "CIA.est")])
+#Step 2 --> Calculating for every country the probability of selecting a person from that country. This will then be the fourth column in the data-base `gdp_area`. 
 
-# Compute the cumulative sum of land area
-land_area_cdf <- cumsum(filtered_dat$Land.Area) / sum(filtered_dat$Land.Area)
+gdp_area<-gdp_area%>%mutate(Weight=gdp_area$LandArea/sum(gdp_area$LandArea))
 
-# Compute the empirical CDF for Z using land area
-ecdf_location <- ecdf(filtered_dat$CIA.est)
 
-# Generate a sequence of values for plotting the ECDF
-x <- seq(0, 200000, length.out = 1000)
+#Step 3 --> Calculating the weighted empirical CDF function with the function `ewcdf()`. This function simply calculates the ecdf of the vector `gdp_area$CIA.8..9..10.` but weights every value with the vector `gdp_area$Weights`.
 
-# Create a data frame for plotting
-df <- data.frame(LandArea = x, CDF = ecdf_location(x))
+ecdf_Z<-ewcdf(gdp_area$CIA.est,weights=gdp_area$Weight)
 
-# Plot the empirical CDF for Z
-library(ggplot2)
-ggplot(df, aes(x = LandArea, y = CDF)) +
-  geom_step() +
-  labs(x = "Land Area (km^2)", y = "Empirical CDF", title = "Empirical CDF of GDP per capita based on Land Area")
+plot(ecdf_Z,xlab="GDP (PPP) per capita in Int$",ylab="EWCDF",main="EW-CDF of GDP per capita of a randomly selected person",sub="(Weighted by land-area of a person's country)" ,col.main="blue",col.sub="blue",pch=16,verticals=TRUE,do.points=FALSE)
 
 # Compare median, 25th percentile, and 75th percentile of X, Y, and Z
-
-
-
-# Calculate the median of x_ecdf if it is a numeric vector
 median_X <- median(x)
-median_Y <- median(filtered_dat$CIA.est)
-median_Z <- median(filtered_dat$CIA.est/filtered_dat$Land.Area)
+median_Y <- quantile(gdp_pers$CIA.est, probs = 0.5, weights = gdp_pers$Weights)
+median_Z <- quantile(gdp_area$CIA.est, probs = 0.5, weights = gdp_area$Weight)
 
-percentile_25_X <- quantile(x, 0.25, na.rm = TRUE)
-percentile_25_Y <- quantile(filtered_dat$CIA.est, 0.25)
-percentile_25_Z <- quantile(filtered_dat$CIA.est / filtered_dat$Land.Area, 0.25)
+percentile_25_X <- quantile(x, 0.25)
+percentile_25_Y <- quantile(gdp_pers$CIA.est, probs = 0.25, weights = gdp_pers$Weights)
+percentile_25_Z <- quantile(gdp_area$CIA.est, probs = 0.25, weights = gdp_area$Weight)
 
-percentile_75_X <- quantile(x, 0.75, na.rm = TRUE)
-percentile_75_Y <- quantile(filtered_dat$CIA.est, 0.75)
-percentile_75_Z <- quantile(filtered_dat$CIA.est / filtered_dat$Land.Area, 0.75)
+percentile_75_X <- quantile(x, 0.75)
+percentile_75_Y <- quantile(gdp_pers$CIA.est, probs = 0.75, weights = gdp_pers$Weights)
+percentile_75_Z <- quantile(gdp_area$CIA.est, probs = 0.75, weights = gdp_area$Weight)
+
 
 # Compare the values
 comparison <- data.frame(Variable = c("X", "Y", "Z"),
@@ -642,6 +638,7 @@ comparison <- data.frame(Variable = c("X", "Y", "Z"),
 
 
 comparison
+
 
 ```
 
@@ -726,12 +723,48 @@ Generally speaking, if the color is darker than it has a stronger correlati
 
 8.b. 
 ```{r, cache=TRUE} 
+joined_comp <- joined_comp[complete.cases(joined_comp$CIA.est), ]
 
-# Fit the multiple linear regression model
-reg_model <- lm(CIA.est ~ Electoral_processand_pluralism + Functioning_of_government + Political_participation + Political_culture + Civil_liberties, data = joined_comp)
+joined_comp$Electoral_processand_pluralism <- as.numeric(joined_comp$Electoral_processand_pluralism)
+joined_comp$Functioning_of_government <- as.numeric(joined_comp$Functioning_of_government)
+joined_comp$Political_participation <- as.numeric(joined_comp$Political_participation)
+joined_comp$Political_culture <- as.numeric(joined_comp$Political_culture)
+joined_comp$Civil_liberties <- as.numeric(joined_comp$Civil_liberties)
 
-# Display the summary of the regression analysis
-summary(reg_model)
+
+model <- lm(joined_comp$CIA.est ~ Electoral_processand_pluralism + Functioning_of_government + 
+              Political_participation + Political_culture + Civil_liberties, data = joined_comp)
+
+# Show the summary of the regression analysis
+summary(model)
+
+# Extract the p-values for each coefficient
+p_values <- summary(model)$coefficients[, 4]
+
+# Identify the significant coefficients at alpha = 0.01
+significant_coefficients <- names(p_values[p_values < 0.01])
+
+# Print the significant coefficients
+cat("Significant coefficients at alpha = 0.01:\n")
+cat(significant_coefficients, sep = ", ")
+
+# Calculate the residuals
+residuals <- residuals(model)
+
+# Combine the residuals with the country names
+residuals_df <- data.frame(Country = joined_comp$Country, Residuals = residuals)
+
+# Sort the dataframe by the absolute value of residuals in descending order
+residuals_df <- residuals_df[order(abs(residuals_df$Residuals), decreasing = TRUE), ]
+
+# Display the top 5 countries with the highest residuals
+cat("Countries with the highest residuals:\n")
+head(residuals_df, 5)
+
+# Display the bottom 5 countries with the lowest residuals
+cat("Countries with the lowest residuals:\n")
+tail(residuals_df, 5)
+
 ```
 
 YOUR ANALYSIS HERE

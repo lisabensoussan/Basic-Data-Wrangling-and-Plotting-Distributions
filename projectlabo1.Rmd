@@ -208,7 +208,6 @@ bottom_averages
 - The top five countries according to the average index value of all the 15 years are: North Korea, Chad, Central African Republic, Syria, Turkmenistan, Democratic Republic of the Congo.
 
 
-
 2.a. 
 ```{r, cache=TRUE} 
 # Create a boxplot showing the distribution of democracy index in 2022 by region
@@ -241,6 +240,7 @@ outliers
 - For the Sub-Saharan Africa, the width of the box looks like the firsts two regions, this suggests that there is considerable variability in the variable being measured within that region.  It's median is approximately 3.75, the lower percentile at approximately 3.1 and the upper percentile at approximately 5.3. The democracy indexes can go from 1.25 to 8. The majority of countries in this region are Authoritarian regimes. It does not have any outlier.
 
 - For the Western Europe,  the width of the box is smaller than the precedent region, the small width indicates that the values are clustered closely together and have limited variability, the gap between the minimum index and the maximum is also not big, can go from 7.4 to 9.9. It's median is approximately 8, the lower percentile at approximately 7.8 and the upper percentile at approximately 8.9. The majority of countries in this region are Full democracy. This region looks a lot like the North America's region. It does have one outlier at approximately 4.35.
+
 
 2.b. 
 ```{r, cache=TRUE} 
@@ -430,6 +430,7 @@ regime_categories <- c("Full democracy", "Flawed democracy", "Hybrid regime", "A
 # Create a matrix of transition probabilities with row and column names
 prob_table <- matrix(transition_probabilities, nrow = 4, byrow = TRUE, dimnames = list(regime_categories, regime_categories))
 
+
 # Create a heatmap to visualize the regime transition probabilities
 heatmap(prob_table, col = colorRampPalette(c("white", "green"))(20), main = "Regime Transition Probabilities")
 ```
@@ -450,7 +451,7 @@ population_size_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries
 incarnation_rates_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_by_incarceration_rate")
 area_url<- read_html("https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area")
 
-# Extracting tables from HTML data
+# Extracting all the tables from HTML data
 gdp.tables = html_nodes(gdp_url, "table")  
 gdp_table <- as.data.frame(html_table(gdp.tables[2], fill = TRUE))  
 
@@ -465,7 +466,7 @@ incarnation_rate_table <- as.data.frame(html_table(incar.tables[2], fill = TRUE)
 area.tables = html_nodes(area_url, "table")  
 area_table <- as.data.frame(html_table(area.tables[2], fill = TRUE))  
 
-# Renaming columns of the tables
+# Renaming columns of the tables so its more intuative to use
 colnames(gdp_table)[colnames(gdp_table) == "Country.Territory"] <- "Country"
 colnames(population_size_table)[colnames(population_size_table) == "Country...Dependency"] <- "Country"
 colnames(incarnation_rate_table)[colnames(incarnation_rate_table) == "Location"] <- "Country"
@@ -474,6 +475,7 @@ colnames(area_table)[colnames(area_table) == "Country...Dependency"] <- "Country
 # Cleaning country names in the GDP table
 gdp_table$Country <- gsub("\\*$", "", gdp_table$Country)
 gdp_table$Country <- gsub("\\ ", "", gdp_table$Country)
+
 
 # Merging tables based on the "Country" column
 joined_table <- merge(list_by_country, gdp_table, by = "Country", all.x = TRUE)
@@ -493,6 +495,8 @@ We can see the first 5 countries in this new table with all the necessaries info
 ```{r, cache=TRUE} 
 # Removing commas from all columns of the joined table
 joined_table <- data.frame(lapply(joined_table, function(x) gsub(",", "", x)))
+gdp_table <- data.frame(lapply(gdp_table, function(x) gsub(",", "", x)))
+
 
 # Renaming specific columns in the joined table
 colnames(joined_table)[colnames(joined_table) == "IMF.5..6."] <- "IMF.est"
@@ -535,6 +539,8 @@ summary(reg_mod_inca)
 # Plotting the relationship between Democracy Index (X2022) and Incarceration Rate (Rate.100000)
 plot(data1$X2022, data1$Rate.100000, xlab = "Democracy Index", ylab = "Incarnation Rate")
 abline(reg_mod_inca, col="red")
+
+
 ```
 
 On the first plot, that analyze the connection between the democracy index and GDP (PPP) per capita, we can see a strong connection and correlation, the regression line is clear and logical, there is some exceptions but the main are linked. We can conclude that the more the democracy index of a country is high, the more the GDP per capita will also be high.
@@ -542,12 +548,19 @@ On a second hand, the second plot that analyse the connection between the democr
 
 6.a. 
 ```{r, cache=TRUE} 
-colnames(gdp_table)[colnames(gdp_table) == "CIA.8..9..10."] <- "CIA.est"
-colnames(gdp_table)[colnames(gdp_table) == "CIA.8..9..10..1"] <- "CIA.year"
+# Find countries that appear more than once
+duplicate_countries <- joined_table$Country[duplicated(joined_table$Country)]
 
-x <- na.omit(as.numeric(gdp_table$CIA.est))
-x_ecdf <- ecdf(x)
-plot(x_ecdf, xlab ="x", ylab="ECDF", main= "Empirical CDF", col.main="blue", pch = 16)
+# Remove rows with duplicate countries
+joined_table <- joined_table[!(joined_table$Country %in% duplicate_countries), ]
+
+# remove all the NA's from the CIA est and convert the data into numeric
+x <- as.numeric(na.omit(joined_table$CIA.est))
+
+# Calculate de CDF of X
+ecdf_X <- ecdf(x)
+
+plot(ecdf_X, xlab ="x", ylab="ECDF", main= "Empirical CDF", col.main="blue", pch = 16)
 ```
 
 On this plot we can see the cdf of gdp per capita of a randomly selected group of a 1,000 countries out of all the counties data.
@@ -557,80 +570,87 @@ We can also see where x is located on that scale, where x is also a randomly sel
 
 6.b. 
 ```{r, cache=TRUE} 
-# Fix the data types
+
+# Convert Population and CIA.est to numeric type
 joined_table$Population <- as.numeric(joined_table$Population)
 joined_table$CIA.est <- as.numeric(joined_table$CIA.est)
 
-gdp_pers<-joined_table%>%select(Country,CIA.est,Population)
-gdp_pers<-na.omit(gdp_pers)
+# Select the relevant columns and remove missing values
+gdp_pers <- na.omit(joined_table %>% select(Country, CIA.est, Population))
 
-#Transforming the vector gdp_area$Landin.km2..mi2. to numeric and then rounding the values to the nearest integer
-gdp_pers$Population<-round(gdp_pers$Population)
+# Round the Population column to whole numbers
+gdp_pers$Population <- round(gdp_pers$Population)
 
-#Step 2 --> Calculating for every country the probability of selecting a person from that country. This will then be the fourth column in the data-base `gdp_area`. 
+# Calculate weights based on population
+gdp_pers <- gdp_pers %>% mutate(Weights = gdp_pers$Population / sum(gdp_pers$Population))
 
-gdp_pers<-gdp_pers%>%mutate(Weights=gdp_pers$Population/sum(gdp_pers$Population))
+# Calculate empirical weighted cumulative distribution function (EW-CDF)
+ecdf_Y <- ewcdf(gdp_pers$CIA.est, weights = gdp_pers$Weights)
 
-
-#Step 3 --> Calculating the weighted empirical CDF function with the function `ewcdf()`. This function simply calculates the ecdf of the vector `gdp_area$CIA.8..9..10.` but weights every value with the vector `gdp_area$Weights`.
-
-ecdf_Y<-ewcdf(gdp_pers$CIA.est,weights=gdp_pers$Weights)
-
-plot(ecdf_Y,xlab="GDP (PPP) per capita in Int$",ylab="EWCDF",main="EW-CDF of GDP per capita of a randomly selected person",sub="(Weighted by Population of a person's country)" ,col.main="blue",col.sub="blue",pch=16,verticals=TRUE,do.points=FALSE)
+# Plot the empirical weighted cumulative distribution function (EW-CDF)
+plot(ecdf_Y, xlab = "GDP (PPP) per capita in Int$", ylab = "EWCDF",
+     main = "EW-CDF of GDP per capita of a randomly selected person",
+     sub = "(Weighted by Population of a person's country)",
+     col.main = "blue", col.sub = "blue", pch = 16, verticals = TRUE, do.points = FALSE)
 ```
 
-The sampled gdp person variable ( AKA Y) represents the Gdp of a randomly uniformly selected person out of all the countries.
-
+In this graph we can see that the majority of the population (0.8) have a 20,000 gdp and under, while the rest (0.2) is located between 20k and 60k.
 
 
 
 6.c. 
 ```{r, cache=TRUE} 
+# Change column name for better readability
 colnames(joined_table)[colnames(joined_table) == "Landin.km2..mi2."] <- "LandArea"
+
+# Extract land area values and convert to numeric type
 land_area <- as.numeric(joined_table$LandArea)
 
-# Remove numbers in parentheses from LandArea column
+# Remove any parentheses and their contents from land area values
 joined_table$LandArea <- gsub("\\s*\\(.*\\)", "", joined_table$LandArea)
 
-# Convert LandArea column to numeric format
+# Convert land area values to numeric type
 joined_table$LandArea <- as.numeric(joined_table$LandArea)
 
-#Step 1 --> Creating a new data-frame `gdp_area` with three columns: one with the name of a country, one with the GDP per capita of that country and one with the land-area of that country. Then removing all NA values. Also transforming the vector gdp_area$Landin.km2..mi2. to numeric and rounding the values to the neareast integer.
+# Select relevant columns for GDP per capita calculation and remove missing values
+gdp_area <- na.omit(joined_table %>% select(Country, CIA.est, LandArea))
 
-gdp_area<-joined_table%>%select(Country,CIA.est,LandArea)
-gdp_area<-na.omit(gdp_area)
+# Convert land area values to numeric and round to nearest whole number
+gdp_area$LandArea <- as.numeric(gdp_area$LandArea)
+gdp_area$LandArea <- round(gdp_area$LandArea)
 
-#Transforming the vector gdp_area$Landin.km2..mi2. to numeric and then rounding the values to the nearest integer
-gdp_area$LandArea<-as.numeric(gdp_area$LandArea)
-gdp_area$LandArea<-round(gdp_area$LandArea)
+# Calculate weights based on land area
+gdp_area <- gdp_area %>% mutate(Weights = gdp_area$LandArea / sum(gdp_area$LandArea))
+
+# Calculate empirical weighted cumulative distribution function (EW-CDF)
+ecdf_Z <- ewcdf(gdp_area$CIA.est, weights = gdp_area$Weights)
+
+# Plot the empirical weighted cumulative distribution function (EW-CDF)
+plot(ecdf_Z, xlab = "GDP (PPP) per capita in Int$", ylab = "EWCDF",
+     main = "EW-CDF of GDP per capita of a randomly selected person",
+     sub = "(Weighted by land-area of a person's country)",
+     col.main = "blue", col.sub = "blue", pch = 16, verticals = TRUE, do.points = FALSE)
+
+# Calculate median and percentiles for X, Y, and Z
+median_X <- quantile(ecdf_X,probs = 0.5)
+median_Y <- quantile(ecdf_Y,probs = 0.5)
+median_Z <- quantile(ecdf_Z,probs = 0.5)
+
+percentile_25_X <- quantile(ecdf_X,probs = 0.25)
+percentile_25_Y <- quantile(ecdf_Y,probs = 0.25)
+percentile_25_Z <- quantile(ecdf_Z,probs = 0.25)
+
+percentile_75_X <- quantile(ecdf_X,probs = 0.75)
+percentile_75_Y <- quantile(ecdf_Y,probs = 0.75)
+percentile_75_Z <- quantile(ecdf_Z,probs = 0.75)
+
+# Add vertical lines at the quantiles
+abline(v = median_Z, col = "red", lty = 2)   # 25% quantile
+abline(v = percentile_25_Z, col = "green", lty = 2) # 50% quantile
+abline(v = percentile_75_Z, col = "blue", lty = 2)  # 75% quantile
 
 
-#Step 2 --> Calculating for every country the probability of selecting a person from that country. This will then be the fourth column in the data-base `gdp_area`. 
-
-gdp_area<-gdp_area%>%mutate(Weight=gdp_area$LandArea/sum(gdp_area$LandArea))
-
-
-#Step 3 --> Calculating the weighted empirical CDF function with the function `ewcdf()`. This function simply calculates the ecdf of the vector `gdp_area$CIA.8..9..10.` but weights every value with the vector `gdp_area$Weights`.
-
-ecdf_Z<-ewcdf(gdp_area$CIA.est,weights=gdp_area$Weight)
-
-plot(ecdf_Z,xlab="GDP (PPP) per capita in Int$",ylab="EWCDF",main="EW-CDF of GDP per capita of a randomly selected person",sub="(Weighted by land-area of a person's country)" ,col.main="blue",col.sub="blue",pch=16,verticals=TRUE,do.points=FALSE)
-
-# Compare median, 25th percentile, and 75th percentile of X, Y, and Z
-median_X <- median(x)
-median_Y <- quantile(gdp_pers$CIA.est, probs = 0.5, weights = gdp_pers$Weights)
-median_Z <- quantile(gdp_area$CIA.est, probs = 0.5, weights = gdp_area$Weight)
-
-percentile_25_X <- quantile(x, 0.25)
-percentile_25_Y <- quantile(gdp_pers$CIA.est, probs = 0.25, weights = gdp_pers$Weights)
-percentile_25_Z <- quantile(gdp_area$CIA.est, probs = 0.25, weights = gdp_area$Weight)
-
-percentile_75_X <- quantile(x, 0.75)
-percentile_75_Y <- quantile(gdp_pers$CIA.est, probs = 0.75, weights = gdp_pers$Weights)
-percentile_75_Z <- quantile(gdp_area$CIA.est, probs = 0.75, weights = gdp_area$Weight)
-
-
-# Compare the values
+# Create a data frame for comparison
 comparison <- data.frame(Variable = c("X", "Y", "Z"),
                          Median = c(median_X, median_Y, median_Z),
                          Percentile_25 = c(percentile_25_X, percentile_25_Y, percentile_25_Z),
@@ -638,11 +658,15 @@ comparison <- data.frame(Variable = c("X", "Y", "Z"),
 
 
 comparison
-
-
 ```
 
-YOUR ANALYSIS HERE
+In this graph we can see that there is a better scatter of the gdp for a randonly selected person by land area :
+majority of the population (0.6) have a 30,000 gdp and under, and the (0.4) is located between 30k and 65k.
+
+The median of X is slightly higher than Y and Z .It might be because dataset for X represents the GDP per capita values of different countries. This means that it includes a wide range of values from various countries, including both high-income and low-income countries. As a result, the dataset for X captures the economic diversity among countries, which can contribute to a higher median compared to the dataset for Y or Z.
+
+The 25th and the 75th percentile of X is slightly higher than Y and Z. It might be because the dataset for X represents GDP per capita values of different countries. Since countries have varying levels of economic development, including both high-income and low-income countries, the dataset for X captures a wide range of GDP per capita values. As a result, the 25th and the 75th percentile of X are expected to be higher due to the inclusion of countries with higher GDP per capita values.
+
 
 
 7 
@@ -673,7 +697,14 @@ table_2022 <- select(list_by_country,Country,c(5))
 table_2006 <- select(list_by_country,Country,c(19))
 mapCountryData(world_map, nameColumnToPlot = "X2022", mapTitle = "2022 Values",
                catMethod = "fixedWidth", numCats = 10, missingCountryCol = "white", addLegend = TRUE, oceanCol = "lightblue")
+
 ```
+
+In 2006 Africa was mostly low democratic with some exceptions, and Russia was orange - on the middle of the scale.
+America and Europe and Australia are very democratic.
+
+In 2022 Africa was has become more democratic (more orange countries) with some exceptions, and Russia has become yellow - less democratic than it was.
+America and Europe and Australia stayed almost the same.
 
 We calculated the average democracy score between 2006 and 2022 for each country.
 then we created a scale representing the scores- from the lowest average (1.06) and colored it close to white, the higest (9.83) as red.
@@ -685,8 +716,6 @@ On the other hand, Africa, the middle east and the East-South countries have low
 8.a. 
 ```{r, cache=TRUE} 
 #Joining the components table in a new variable:
-
-
 joined_comp <- merge(components,joined_table,by = "Country")
 
 #changing the titles of 5 columns that we'll need :
@@ -713,16 +742,17 @@ corrplot(cor_matrix, method = "color", type = "upper",
          tl.col = "black", tl.srt = 45)
 ```
 
-In the first data table we have presented the top five.
+In the first data table we have presented the top five rows of the new merged data.
 
 In the heatmap of the five democracy elements correlations we can see that the 2 pairs -  Electoral process and pluralism (EEP) and Civil liberties (CL), Functioning of government(FG) and Civil liberties,have the highest  correlations (above 0.8).
-We can say that the following pairs have highest correlations : (EPP ,FG),(EPP ,Political Prticipation(PP)), (PP, CL).
+We can say that the following pairs have highest correlations : (EPP ,FG),(EPP ,Political Participation(PP)), (PP, CL).
 The lowest pairs are: (EPP,Political culture) and (Political Participation,Political culture).
 
-Generally speaking, if the color is darker than it has a stronger correlati
+Generally speaking, if the color is darker than it has a stronger correlation
 
 8.b. 
 ```{r, cache=TRUE} 
+
 joined_comp <- joined_comp[complete.cases(joined_comp$CIA.est), ]
 
 joined_comp$Electoral_processand_pluralism <- as.numeric(joined_comp$Electoral_processand_pluralism)
@@ -754,6 +784,8 @@ residuals <- residuals(model)
 # Combine the residuals with the country names
 residuals_df <- data.frame(Country = joined_comp$Country, Residuals = residuals)
 
+
+
 # Sort the dataframe by the absolute value of residuals in descending order
 residuals_df <- residuals_df[order(abs(residuals_df$Residuals), decreasing = TRUE), ]
 
@@ -766,5 +798,20 @@ cat("Countries with the lowest residuals:\n")
 tail(residuals_df, 5)
 
 ```
+The top five highest residuals are : Luxembourg, Qatar, Singapore, Ireland and United Arab Emirates.
 
-YOUR ANALYSIS HERE
+The top five lowest residuals are : North Korea,Jordan,Yemen,Taiwan and Chad
+
+
+Other factors contributing to their high or low GDP per capita could include:
+
+Economic policies and governance
+Natural resources and their management
+Political stability
+Education and human capital
+Infrastructure development
+Trade and international relations
+Technological advancements
+Income inequality and distribution
+Access to healthcare and social services
+Environmental factors

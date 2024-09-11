@@ -55,16 +55,16 @@ Analysis and Visualizations
 Prerequisites
 
 The following libraries are required to run this analysis:
-library(tidyverse)
-library(data.table)
-library(rworldmap)
-library(ggthemes)
-library(reshape2)
-library(e1071)
-library(rvest)
-library(corrplot)
-library(moments)
-library(spatstat.geom)
+- library(tidyverse)
+- library(data.table)
+- library(rworldmap)
+- library(ggthemes)
+- library(reshape2)
+- library(e1071)
+- library(rvest)
+- library(corrplot)
+- library(moments)
+- library(spatstat.geom)
 
 Instructions
 

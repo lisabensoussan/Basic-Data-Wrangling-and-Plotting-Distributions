@@ -1,6 +1,6 @@
-Democracy Index Analysis - Lab 1: Basic Data Wrangling and Plotting, Distributions
+##Democracy Index Analysis - Lab 1: Basic Data Wrangling and Plotting, Distributions
 
-Project Overview
+###Project Overview
 
 This project provides an in-depth analysis of the World Democracy Index dataset. It utilizes data manipulation techniques and statistical visualization methods in R to explore global democracy trends over time, specifically focusing on the years 2006 to 2022.
 
